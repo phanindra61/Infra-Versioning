@@ -1,35 +1,20 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
     environment {
         AWS_REGION = "us-east-1"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/phanindra61/Infra-Versioning.git'
-            }
-        }
-
-        stage('Terraform Version') {
-            steps {
-                sh 'terraform version'
+                git branch: 'master', url: 'https://github.com/phanindra61/Infra-Versioning.git'
             }
         }
 
         stage('Terraform Init') {
             steps {
-                withAWS(
-                    credentials: 'aws-creds',
-                    region: "${AWS_REGION}"
-                ) {
+                withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
                     sh 'terraform init -input=false'
                 }
             }
@@ -37,10 +22,7 @@ pipeline {
 
         stage('Terraform Validate') {
             steps {
-                withAWS(
-                    credentials: 'aws-creds',
-                    region: "${AWS_REGION}"
-                ) {
+                withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
                     sh 'terraform validate'
                 }
             }
@@ -48,10 +30,7 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                withAWS(
-                    credentials: 'aws-creds',
-                    region: "${AWS_REGION}"
-                ) {
+                withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
                     sh 'terraform plan -input=false -out=tfplan'
                 }
             }
@@ -59,10 +38,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                withAWS(
-                    credentials: 'aws-creds',
-                    region: "${AWS_REGION}"
-                ) {
+                withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
                     sh 'terraform apply -input=false -auto-approve tfplan'
                 }
             }
@@ -71,18 +47,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts(
-                artifacts: '**/*.tf',
-                allowEmptyArchive: true
-            )
-        }
-
-        success {
-            echo 'Terraform deployment completed successfully.'
-        }
-
-        failure {
-            echo 'Terraform deployment failed. Check the stage logs.'
+            archiveArtifacts artifacts: '**/*.tf', allowEmptyArchive: true
         }
     }
 }
