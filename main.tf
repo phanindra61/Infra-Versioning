@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "demo_bucket" {
 
 # Create EC2 instance
 resource "aws_instance" "demo_ec2" {
-  ami = "ami-0332d564d76dbd8d6"
+  ami           = "ami-0332d5dd6dbd8d6"
   instance_type = var.ec2_instance_type
 
   tags = {
